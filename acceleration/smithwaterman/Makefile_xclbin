@@ -1,0 +1,42 @@
+DEVICE := $(DEVICES)
+XCLBIN := ./xclbin
+
+include ./utils.mk
+
+DSA := $(call device2sandsa, $(DEVICE))
+BUILD_DIR := ./_x.$(DSA)
+
+XOCC := $(XILINX_SDX)/bin/xocc
+
+# Kernel compiler global settings
+CLFLAGS += -t hw --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -I./src/ --kernel_frequency 235
+
+EMCONFIG_DIR = $(XCLBIN)/$(DSA)
+
+BINARY_CONTAINERS += $(XCLBIN)/krnl_smithwaterman.$(DSA).xclbin
+BINARY_CONTAINER_krnl_smithwaterman_OBJS += $(XCLBIN)/opencl_sw_maxscore.$(DSA).xo
+
+.PHONY: all clean cleanall emconfig
+all: check-devices $(BINARY_CONTAINERS) emconfig
+
+# Building kernel
+$(XCLBIN)/opencl_sw_maxscore.$(DSA).xo: src/opencl_sw_maxscore_systolic.cpp
+	mkdir -p $(XCLBIN)
+	$(XOCC) $(CLFLAGS) -c -k opencl_sw_maxscore -I'$(<D)' -o'$@' '$<'
+$(XCLBIN)/krnl_smithwaterman.$(DSA).xclbin: $(BINARY_CONTAINER_krnl_smithwaterman_OBJS)
+	mkdir -p $(XCLBIN)
+	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk opencl_sw_maxscore:2 -o'$@' $(+)
+
+emconfig:$(EMCONFIG_DIR)/emconfig.json
+$(EMCONFIG_DIR)/emconfig.json:
+	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
+
+# Cleaning stuff
+clean:
+	-$(RMDIR) sdaccel_* TempConfig system_estimate.xtxt *.rpt
+	-$(RMDIR) _xocc_* .Xil emconfig.json dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
+
+cleanall: clean
+	-$(RMDIR) $(XCLBIN)
+	-$(RMDIR) _x.*
