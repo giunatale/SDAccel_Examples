@@ -253,11 +253,10 @@ void swMaxScore(unsigned int readRefPacked[NUMPACKED][PACKEDSZ], short out[NUMPA
 //#ifndef HLS_COMPILE
 extern "C" {
 //#endif
-    void opencl_sw_maxscore(unsigned int *input, unsigned int  *output, const int size) {
+    void opencl_sw_maxscore(unsigned int *input, unsigned int  *output, int size) {
 #pragma HLS inline region off
 #pragma HLS INTERFACE m_axi port=input offset=slave bundle=gmem 
 #pragma HLS INTERFACE m_axi port=output offset=slave bundle=gmem 
-#pragma HLS INTERFACE m_axi port=size offset=slave bundle=gmem 
 #pragma HLS INTERFACE s_axilite port=input bundle=control
 #pragma HLS INTERFACE s_axilite port=output bundle=control
 #pragma HLS INTERFACE s_axilite port=size bundle=control
