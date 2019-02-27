@@ -253,7 +253,7 @@ void swMaxScore(unsigned int readRefPacked[NUMPACKED][PACKEDSZ], short out[NUMPA
 //#ifndef HLS_COMPILE
 extern "C" {
 //#endif
-    void opencl_sw_maxscore(unsigned int *input, unsigned int  *output, int *size) {
+    void opencl_sw_maxscore(unsigned int *input, unsigned int  *output, const int size) {
 #pragma HLS inline region off
 #pragma HLS INTERFACE m_axi port=input offset=slave bundle=gmem 
 #pragma HLS INTERFACE m_axi port=output offset=slave bundle=gmem 
@@ -269,7 +269,7 @@ extern "C" {
         int numIter;
 #pragma HLS array partition variable=readRefPacked  dim=1
 #pragma HLS array partition variable=out dim=0
-        numIter = *size;
+        numIter = size;
         int loop = 0;
         for(loop = 0; loop < numIter; loop++){
             /*read from device memory to BRAM*/

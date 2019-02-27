@@ -5,6 +5,8 @@ ABS_COMMON_REPO = $(shell readlink -f $(COMMON_REPO))
 DEVICE := $(DEVICES)
 XCLBIN := ./xclbin
 
+all: real_all
+
 include ./utils.mk
 
 DSA := $(call device2sandsa, $(DEVICE))
@@ -22,7 +24,7 @@ BINARY_CONTAINERS += $(XCLBIN)/krnl_smithwaterman.$(DSA).xclbin
 BINARY_CONTAINER_krnl_smithwaterman_OBJS += $(XCLBIN)/opencl_sw_maxscore.$(DSA).xo
 
 .PHONY: all clean cleanall emconfig
-all: check-devices $(BINARY_CONTAINERS) emconfig
+real_all: check-devices $(BINARY_CONTAINERS) emconfig
 
 # Building kernel
 $(XCLBIN)/opencl_sw_maxscore.$(DSA).xo: src/opencl_sw_maxscore_systolic.cpp
